@@ -1,8 +1,8 @@
-Flask==1.0.4
-Werkzeug==0.10.4
-Jinja2==2.11.2
+Flask==2.0.2
+Werkzeug==2.0.2
+Jinja2==3.0.3
 gunicorn==0.17.2
-setuptools==45
+setuptools==49.2.1
 pandas==1.2.0
 plotly==5.5.0
 dash==2.0.0
