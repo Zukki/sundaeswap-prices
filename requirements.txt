@@ -3,3 +3,9 @@ Werkzeug==0.10.4
 Jinja2==2.11.2
 gunicorn==0.17.2
 setuptools==45
+pandas==1.2.0
+plotly==5.5.0
+dash==2.0.0
+dash-core-components==2.0.0
+dash-html-components==2.0.0
+dash-table==5.0.0
