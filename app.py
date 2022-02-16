@@ -4,5 +4,5 @@ app = Flask(__name__)
 
 @app.route('/')
 def source():
-	html = 'Hello World!'
+	html = 'Heroku sucks big time'
 	return html
