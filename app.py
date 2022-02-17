@@ -2,19 +2,16 @@ import pandas as pd
 from datetime import datetime
 import plotly.express as px  # (version 4.7.0 or higher)
 from dash import Dash, dcc, html, Input, Output  # pip install dash (version 2.0.0 or higher)
-import os
 
-curdir = os.path.dirname(__file__)
-print(curdir)
-filedir = os.path.join(os.path.dirname(__file__), "static\sundaeswap_calculated.csv")
-print(filedir)
-
-df = pd.read_csv(filedir)
-df['DateTime'] = pd.to_datetime(df['DateTime'])
-
+url='https://drive.google.com/file/d/1QaMrBMoczpE5jCoklq11oVIZIf8LRKQ1/view?usp=sharing'
+url='https://drive.google.com/uc?id=' + url.split('/')[-2]
+df = pd.read_csv(url)
 
 print(df.head(1))
 print(df.tail(1))
+print(df.info())
+
+df['DateTime'] = pd.to_datetime(df['DateTime'])
 
 FILTER_DATE = datetime.fromisoformat('2022-02-13 19:00:00')
 
