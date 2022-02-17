@@ -3,25 +3,33 @@ from datetime import datetime
 import plotly.express as px  # (version 4.7.0 or higher)
 from dash import Dash, dcc, html, Input, Output  # pip install dash (version 2.0.0 or higher)
 
-url='https://drive.google.com/file/d/1QaMrBMoczpE5jCoklq11oVIZIf8LRKQ1/view?usp=sharing'
-url='https://drive.google.com/uc?id=' + url.split('/')[-2]
-df = pd.read_csv(url)
+# url='https://drive.google.com/file/d/1QaMrBMoczpE5jCoklq11oVIZIf8LRKQ1/view?usp=sharing'
+# url='https://drive.google.com/uc?id=' + url.split('/')[-2]
+# df = pd.read_csv(url)
+
+df = pd.DataFrame()
 
 print(df.head(1))
 print(df.tail(1))
 print(df.info())
 
-df['DateTime'] = pd.to_datetime(df['DateTime'])
+try:
+    df['DateTime'] = pd.to_datetime(df['DateTime'])
+    FILTER_DATE = datetime.fromisoformat('2022-02-13 19:00:00')
+except:
+    print('Datetime error')
 
-FILTER_DATE = datetime.fromisoformat('2022-02-13 19:00:00')
-
-pairs = df['_PAIR_ID'].unique()
 pairDefault = 'SUNDAE/ADA_0.3'
 pairOptions = []
-for pair in pairs:
-    item = {"label": pair, "value": pair}
-    pairOptions.append(item)
 
+try:
+    pairs = df['_PAIR_ID'].unique()
+    for pair in pairs:
+        item = {"label": pair, "value": pair}
+        pairOptions.append(item)
+except:
+    print('_PAIR_ID error')
+    
 app = Dash(__name__)
 
 # ------------------------------------------------------------------------------
@@ -70,7 +78,7 @@ def update_graph(slcted_pair, slcted_date):
     print(slcted_date)
     print(type(slcted_date))
 
-    
+
     filter = (df['DateTime'] > FILTER_DATE) & (df['_PAIR_ID'] == slcted_pair)
     filteredDf = df[filter].copy()
         
