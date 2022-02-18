@@ -2,33 +2,27 @@ import pandas as pd
 from datetime import datetime
 import plotly.express as px  # (version 4.7.0 or higher)
 from dash import Dash, dcc, html, Input, Output  # pip install dash (version 2.0.0 or higher)
+import requests
+import json
 
-# url='https://drive.google.com/file/d/1QaMrBMoczpE5jCoklq11oVIZIf8LRKQ1/view?usp=sharing'
-# url='https://drive.google.com/uc?id=' + url.split('/')[-2]
-# df = pd.read_csv(url)
 
-df = pd.DataFrame()
-
-print(df.head(1))
-print(df.tail(1))
-print(df.info())
-
-try:
-    df['DateTime'] = pd.to_datetime(df['DateTime'])
-    FILTER_DATE = datetime.fromisoformat('2022-02-13 19:00:00')
-except:
-    print('Datetime error')
+FILTER_DATE = datetime.fromisoformat('2022-02-13 19:00:00')
 
 pairDefault = 'SUNDAE/ADA_0.3'
-pairOptions = []
-
-try:
-    pairs = df['_PAIR_ID'].unique()
-    for pair in pairs:
-        item = {"label": pair, "value": pair}
-        pairOptions.append(item)
-except:
-    print('_PAIR_ID error')
+pairOptions = [{"label": 'SUNDAE/ADA_0.3', "value": 'SUNDAE/ADA_0.3'},
+               {"label": 'WMT/ADA_0.3', "value": 'WMT/ADA_0.3'},
+               {"label": 'LQ/ADA_0.3', "value": 'LQ/ADA_0.3'},
+               {"label": 'MIN/ADA_0.3', "value": 'MIN/ADA_0.3'},
+               {"label": 'MELD/ADA_0.3', "value": 'MELD/ADA_0.3'},
+               {"label": 'MILK/ADA_0.3', "value": 'MILK/ADA_0.3'}]
+# pairOptions = []
+# try:
+#     pairs = df['PairId'].unique()
+#     for pair in pairs:
+#         item = {"label": pair, "value": pair}
+#         pairOptions.append(item)
+# except:
+#     print('PairId error')
     
 app = Dash(__name__)
 
@@ -78,8 +72,9 @@ def update_graph(slcted_pair, slcted_date):
     print(slcted_date)
     print(type(slcted_date))
 
-
-    filter = (df['DateTime'] > FILTER_DATE) & (df['_PAIR_ID'] == slcted_pair)
+    df = getDF(slcted_pair)
+    
+    filter = (df['DateTime'] > FILTER_DATE) & (df['PairId'] == slcted_pair)
     filteredDf = df[filter].copy()
         
     container = "Filtering by: {0}, {1} | {2}".format(slcted_pair, slcted_date, filteredDf.shape)
@@ -94,6 +89,53 @@ def update_graph(slcted_pair, slcted_date):
     )
 
     return container, fig
+
+# ------------------------------------------------------------------------------
+def getDF(asset):
+    jData = getFromApi(asset)
+
+    df = pd.DataFrame(jData, columns =['PairId','Index','DateTimeUnix','PairPrice'])
+    df = df.set_index('Index')
+
+    def datetimeFromUnix(ts:str):
+        return datetime.utcfromtimestamp(int(ts))
+
+    df['PairPrice'] = df['PairPrice'].astype(float)
+    df['DateTime'] = df['DateTimeUnix'].apply(datetimeFromUnix)
+    df.info()
+
+    #### END -- DF FROM API ##########################################################
+
+    print(df.head(1))
+    print(df.tail(1))
+    print(df.info())
+    
+    return df
+
+def getFromApi(asset):
+    #### DF FROM API ##########################################################
+    #url = "https://601fa5cgn2.execute-api.us-east-1.amazonaws.com/Dev/assets?asset=SUNDAE/ADA_0.3"
+    url = "https://601fa5cgn2.execute-api.us-east-1.amazonaws.com/Dev/assets?asset="+asset
+    myResponse = requests.get(url)
+    print (myResponse.status_code)
+    jData = {}
+    # For successful API call, response code will be 200 (OK)
+    if(myResponse.ok):
+        jData = json.loads(myResponse.content)
+        print("The response contains {0} properties".format(len(jData)))
+    else:
+    # If response code is not ok (200), print the resulting http error code with description
+        myResponse.raise_for_status()
+    
+    return jData
+
+
+
+
+
+
+
+
 
 # ------------------------------------------------------------------------------
 if __name__ == '__main__':
